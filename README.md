@@ -1,6 +1,6 @@
 # CPU Stress Test
 
-A small Bash utility for stress-testing a CPU and monitoring its behaviour in real time.
+This tool is designed to help analyze CPU cooling performance, monitor temperatures and detect thermal throttling during sustained CPU load. It is intended as a diagnostic utility rather than a benchmark.
 
 ## Features
 
