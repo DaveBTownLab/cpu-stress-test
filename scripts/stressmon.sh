@@ -5,7 +5,10 @@ tput civis
 trap 'tput cnorm; clear; exit' INT TERM
 
 MAX_TEMP=0
+MAX_TEMP_TIME=0
+
 MIN_FREQ=999
+MIN_FREQ_TIME=0
 
 get_cpu() {
     awk -F: '/model name/ {
@@ -67,23 +70,53 @@ while true; do
     CUR_FREQ=$(echo "$FREQ" | awk '{print $1}')
     CUR_TEMP=$(echo "$TEMP" | tr -d '+°C')
 
-    if [ "${USAGE%\%}" -ge 95 ];
-    then
+    #################################################
+    # Nur während des Stresstests Werte speichern
+    #################################################
 
-    # Maximaltemperatur merken
-    if [[ "$CUR_TEMP" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
-        if awk "BEGIN {exit !($CUR_TEMP > $MAX_TEMP)}"; then
-            MAX_TEMP=$CUR_TEMP
+    if [ "${USAGE%\%}" -ge 95 ]; then
+
+        # Höchste Temperatur
+        if [[ "$CUR_TEMP" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+            if awk "BEGIN {exit !($CUR_TEMP > $MAX_TEMP)}"; then
+                MAX_TEMP="$CUR_TEMP"
+                MAX_TEMP_TIME="$SECONDS"
+            fi
+        fi
+
+        # Niedrigste Frequenz
+        if [[ "$CUR_FREQ" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+            if awk "BEGIN {exit !($CUR_FREQ < $MIN_FREQ)}"; then
+                MIN_FREQ="$CUR_FREQ"
+                MIN_FREQ_TIME="$SECONDS"
+            fi
         fi
     fi
 
-    # Niedrigste Frequenz merken
-    if [[ "$CUR_FREQ" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
-        if awk "BEGIN {exit !($CUR_FREQ < $MIN_FREQ)}"; then
-            MIN_FREQ=$CUR_FREQ
-        fi
+    #################################################
+    # Anzeige vorbereiten
+    #################################################
+
+    if [ "$MAX_TEMP_TIME" -eq 0 ]; then
+        SHOW_MAX_TEMP="..."
+        SHOW_MAX_TEMP_TIME="..."
+    else
+        SHOW_MAX_TEMP="$MAX_TEMP"
+        SHOW_MAX_TEMP_TIME="$MAX_TEMP_TIME"
     fi
+
+    if [ "$MIN_FREQ_TIME" -eq 0 ]; then
+        SHOW_MIN_FREQ="..."
+        SHOW_MIN_FREQ_TIME="..."
+    else
+        SHOW_MIN_FREQ="$MIN_FREQ"
+        SHOW_MIN_FREQ_TIME="$MIN_FREQ_TIME"
     fi
+
+    #################################################
+    # Ausgabe
+    #################################################
+
     echo "========================================"
     printf " %-38s\n" "Stress Monitor"
     echo "========================================"
@@ -91,10 +124,12 @@ while true; do
 
     printf "%-10s %s\n" "CPU:" "$CPU"
     printf "%-10s %s\n" "Usage:" "$USAGE"
-    printf "%-10s %-10s %-12s %s GHz\n" \
-        "Freq:" "$FREQ" "Min:" "$MIN_FREQ"
-    printf "%-10s %-10s %-12s %s°C\n" \
-        "Temp:" "$TEMP" "Max:" "$MAX_TEMP"
+
+    printf "%-10s %-10s %-12s %s GHz @ %ss\n" \
+        "Freq:" "$FREQ" "Min:" "$SHOW_MIN_FREQ" "$SHOW_MIN_FREQ_TIME"
+
+    printf "%-10s %-10s %-12s %s °C @ %ss\n" \
+        "Temp:" "$TEMP" "Max:" "$SHOW_MAX_TEMP" "$SHOW_MAX_TEMP_TIME"
 
     echo
     echo "Ctrl+C to quit."
