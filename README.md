@@ -1,77 +1,115 @@
-# CPU Stress Test
+# stressmon-ng
 
-This tool is designed to help analyze CPU cooling performance, monitor temperatures and detect thermal throttling during sustained CPU load. It is intended as a diagnostic utility rather than a benchmark.
+A lightweight Linux CPU stress testing and monitoring tool built around **stress-ng**.
+
+Unlike a simple stress-ng wrapper, **stressmon-ng** launches a CPU stress test together with a live monitoring window that displays CPU usage, frequency and temperature while automatically tracking minimum and maximum values over time.
+
+---
 
 ## Features
 
-- CPU stress test using `stress-ng`
-- Live CPU frequency
+- Launches a configurable `stress-ng` CPU workload
 - Live CPU usage
+- Live CPU frequency
 - Live CPU temperature
-- Records the lowest CPU frequency under load
-- Records the highest CPU temperature under load
-- Configurable test duration in seconds
+- Lowest CPU frequency with timestamp
+- Highest CPU temperature with timestamp
+- Lightweight and dependency-free Bash scripts
+- Relative paths (can be launched from anywhere)
+- Separate monitoring window using Konsole
+
+---
 
 ## Requirements
 
 - bash
 - stress-ng
 - lm-sensors
-- xfce4-terminal
+- procps-ng
+- konsole (default terminal)
+
+---
 
 ## Folder Structure
 
-```
-cpu-stress-toolkit/
-├── stresstest.sh
+```text
+stressmon-ng/
+├── LICENSE
+├── README.md
+├── stressmon-ng.sh
 └── scripts/
     ├── stresscpu.sh
     └── stressmon.sh
 ```
 
+---
+
 ## Usage
 
-Run a 60-second stress test:
+Run a 60 second stress test:
 
 ```bash
-./stresstest.sh
+./stressmon-ng.sh
 ```
 
-Run a 5-minute stress test:
+Run a 5 minute stress test:
 
 ```bash
-./stresstest.sh 300
+./stressmon-ng.sh 300
 ```
 
-Run only the stress test:
+Run only the CPU stress test:
 
 ```bash
 ./scripts/stresscpu.sh 300
 ```
 
-Run only the monitor:
+Run only the monitoring window:
 
 ```bash
 ./scripts/stressmon.sh
 ```
 
-## Output
+---
 
-The monitor displays:
+## Example Output
 
-- CPU model
-- CPU usage
-- Current frequency
-- Lowest frequency reached
-- Current temperature
-- Highest temperature reached
+```text
+==========================================================
+Stress Monitor
+==========================================================
 
-## Notes
+CPU:    AMD A9-9420 Radeon R5
+Usage:  100%
+Freq:   3.31 GHz     Min: 3.29 GHz @ 32s
+Temp:   85.5°C       Max: 85.5°C @ 46s
+```
 
-The launcher currently uses `xfce4-terminal` to open the stress test and monitor in separate windows.
+---
 
-If you want to use a different terminal emulator, simply replace the `xfce4-terminal`
-command in `stresstest.sh`.
+## How it works
+
+`stressmon-ng` starts two independent processes:
+
+- **stresscpu.sh** starts the CPU workload using `stress-ng`
+- **stressmon.sh** continuously monitors:
+  - CPU usage
+  - CPU frequency
+  - CPU temperature
+  - lowest recorded frequency
+  - highest recorded temperature
+
+This makes it easy to evaluate cooling performance, CPU boosting behaviour and thermal throttling.
+
+---
+
+## Customization
+
+The launcher currently uses **Konsole**.
+
+If you prefer another terminal emulator (Kitty, Alacritty, GNOME Terminal, etc.), simply replace the `konsole` command inside `stressmon-ng.sh`.
+
+---
 
 ## License
 

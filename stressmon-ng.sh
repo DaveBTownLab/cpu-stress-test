@@ -11,14 +11,14 @@ echo "$CPU_SCRIPT"
 echo "$MONITOR_SCRIPT"
 
 
-xfce4-terminal \
+konsole \
     --title="CPU Stress Test" \
-    --working-directory="$SCRIPT_DIR/scripts" \
+    --workdir="$SCRIPT_DIR/scripts" \
     -e "$CPU_SCRIPT $DURATION" &
 
 sleep 0.5
 
-xfce4-terminal \
+konsole \
     --title="Stress Monitor" \
-    --working-directory="$SCRIPT_DIR/scripts" \
+    --workdir="$SCRIPT_DIR/scripts" \
     -e "$MONITOR_SCRIPT" &
